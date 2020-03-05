@@ -117,8 +117,10 @@ class MidiEventParse extends ByteReader
       int channel = eventByte & 0xf;
       int dataSize = 2;
       byte[] notes;
-      switch((eventByte >> 4) & 0xF)
+      int midiEventType = (eventByte >> 4) & 0xF;
+      switch(midiEventType)
       {      
+      case 0x8:
       case 0x9://"Note on");       
         notes = readRunningStatus(dataSize);        
         try
@@ -126,11 +128,10 @@ class MidiEventParse extends ByteReader
           for (int i = 0; i < notes.length; i+=3)
           {           
             int midi_note = notes[i+1];
-            int velocity = notes[i+2];
-            int delta = notes[i];
-            runningDelta += delta;
-            midiNotes.add(new MidiNote(channel, midi_note, velocity, delta, runningDelta));
-            //println("Channel: " + str(channel) + " note: " + str(midi_note) + " velocity: " + str(velocity) + " time: " + str(delta) +  " ");
+            //int velocity = notes[i+2];
+            int velocity = (midiEventType == 0x9)? notes[i+2] : 0;
+            int delta = notes[i];            
+            midiNotes.add(new MidiNote(channel, midi_note, velocity, delta));
           }
         }
         catch(Exception e) 
@@ -138,25 +139,7 @@ class MidiEventParse extends ByteReader
           printByteArray(notes);
           throw e;
         }
-      case 0x8://"Note off");   
-        notes = readRunningStatus(dataSize);        
-        try
-        {
-          for (int i = 0; i < notes.length; i+=3)
-          {           
-            int midi_note = notes[i+1];
-            int velocity = 0;
-            int delta = notes[i];
-            runningDelta += delta;
-            midiNotes.add(new MidiNote(channel, midi_note, velocity, delta, runningDelta));
-            //println("Channel: " + str(channel) + " note: " + str(midi_note) + " velocity: " + str(velocity) + " time: " + str(delta) +  " ");
-          }
-        }
-        catch(Exception e) 
-        {
-          printByteArray(notes);
-          //throw e;
-        }
+        break;
       case 0xA://"Polyphonic Key Pressure");
       case 0xB://"Control Change");
       case 0xE://"Pitch Bend");
@@ -175,31 +158,24 @@ class MidiEventParse extends ByteReader
     int channel = event_type & 0xf;
     int dataSize = 2;
     byte[] notes;
-    switch((event_type >> 4) & 0xF)
+    int midiEventType = (event_type >> 4) & 0xF;
+    switch(midiEventType)
     {         
-
+    case 0x8:// Note off
     case 0x9:// Note on                 
       if (isInRunningStatus(dataSize))
       {
         runningStatus = true;
         print(" in running status mode! ");
       }
-      notes =  readBytes(dataSize);      
-      runningDelta += deltaTime;
-      midiNotes.add(new MidiNote(channel, notes[0], notes[1], deltaTime, runningDelta));
+      notes = readBytes(dataSize);      
+      int midi_note = notes[0];      
+      int velocity = (midiEventType == 0x9) ? notes[1] : 0;
+
+      midiNotes.add(new MidiNote(channel, midi_note, velocity, deltaTime));
       break; 
-    case 0x8:// Note off
-      if (isInRunningStatus(dataSize))
-      {
-        runningStatus = true;
-        print(" in running status mode! ");
-      }      
-      notes =  readBytes(dataSize);      
-      runningDelta += deltaTime;
-      midiNotes.add(new MidiNote(channel, notes[0], 0, deltaTime, runningDelta));
-      break;
     default:      
-      switch((event_type >> 4) & 0xF)
+      switch(midiEventType)
       {
       case 0xC:// Program Change            
       case 0xD:// Channel Key Pressure
@@ -448,6 +424,10 @@ class MidiFile extends ByteReader
   {
     curByteIndex = 0;
     data = loadBytes(filepath + ".mid");    
+    if (data == null)
+    {
+      throw new IllegalArgumentException("File Doesn't Exist");
+    }
     header.setHeader(readBytes(14));
     tracks = new ArrayList<ArrayList<MidiNote>>();
     for (int i = 0; i < header.ntrks; ++i)//header.ntrks
@@ -464,16 +444,10 @@ class MidiFile extends ByteReader
   //---------------------------------------------------------------------------
   ArrayList<ArrayList<MidiNote>> getAllNotes()
   {
-
     for (int i = 0; i < header.ntrks; ++i)//header.ntrks
     {
       tracks.get(i).addAll(readChunk().parseEventsForNotes());
-    }
-    //for (int i = 0; i < 2; ++i)//header.ntrks
-    //{
-    //  allNotes.addAll(readChunk().parseEventsForNotes());
-    //}    
-    //quantize(0.0125);
+    }    
     setBeats();
     return tracks;
   }
@@ -507,7 +481,7 @@ class MidiFile extends ByteReader
       allNotes.set(i, n);
     }
   }
-
+  //---------------------------------------------------------------------------
   void setBeats()
   {    
     for (ArrayList<MidiNote> t : tracks)
@@ -517,12 +491,6 @@ class MidiFile extends ByteReader
         n.beats = float(n.delta_time) / float(header.division);
       }
     }
-    //for (int i = 0; i < allNotes.size(); i++)
-    //{
-    //  MidiNote n = allNotes.get(i);
-    //  n.beats = float(n.delta_time) / float(header.division);     
-    //  allNotes.set(i, n);
-    //}
   }
   //---------------------------------------------------------------------------
 }

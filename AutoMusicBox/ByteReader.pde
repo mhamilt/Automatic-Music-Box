@@ -20,8 +20,8 @@ class ByteReader
       print("OVERFLOW!!!");
       curByteIndex -= 20;
       printBytes(20);
-      //throw e;
-      return null;
+      throw e;
+      //return null;
     }
   }
 

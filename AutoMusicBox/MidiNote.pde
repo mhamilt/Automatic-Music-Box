@@ -6,16 +6,13 @@ class MidiNote
   int delta_time;  
   float beats;
   
-
   MidiNote(int c, int n, int v, int t) 
   {
     channel = c;
     note = n;
     velocity = v;
-    delta_time = t;
-    runningDelta = rd;
+    delta_time = t;    
   }
-
 
   MidiNote(int n, int v, float b) 
   {    

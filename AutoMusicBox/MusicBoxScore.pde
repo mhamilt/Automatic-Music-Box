@@ -40,6 +40,7 @@ class MusicBoxScore
   PGraphics svg;
   float svg_scale = 2.85;
   float pixelsSvgPerBeat = mmPerBeat * svg_scale;
+  int page = 0;
   //---------------------------------------------------------------------------
 
   MusicBoxScore(ArrayList<ArrayList<MidiNote>> midiTracks)
@@ -47,91 +48,7 @@ class MusicBoxScore
     noteList = Arrays.asList(noteString.split("\\s*,\\s*"));
     score = new ArrayList<MusicBoxNote>();
     midiScore = midiTracks;
-  }
-  //---------------------------------------------------------------------------
-  void setMidiNotePallet()
-  {
-    //for (MidiNote n : midiScore)
-    //{
-    //  if (!midiNotePallet.hasValue(n.note))
-    //  {
-    //    midiNotePallet.append(n.note);
-    //  }
-    //}
-  }
-  //---------------------------------------------------------------------------
-  float getShortestSuccessiveRhythm()
-  {
-    for (int i : midiNotePallet)
-    {
-      //  float beatCounter = 0.0;
-      //  boolean firstTime = true;
-      //  boolean shouldCount = false;
-      //  for (MidiNote n : midiScore)
-      //  {
-      //    if (n.note == i)
-      //    {
-      //      if (!firstTime)
-      //      {
-      //        if (beatCounter > 0.0)
-      //        {
-      //          if (beatCounter < shortestDuration)
-      //          {
-      //            shortestDuration = n.beats;
-      //          }
-      //        }
-      //        beatCounter = 0.0;
-      //      } else if (shouldCount)
-      //      {
-      //        if (beatCounter > 0.0)
-      //        {
-      //          shortestDuration = beatCounter;
-      //          firstTime = false;
-      //        }
-      //        beatCounter = 0.0;
-      //      } else
-      //      {
-      //        shouldCount = true;
-      //      }
-      //    }
-      //    if (shouldCount)
-      //    {
-      //      beatCounter += n.beats;
-      //    }
-      //  }
-    }
-    shortestDuration = (shortestDuration < minRepeatDur) ? minRepeatDur : shortestDuration;
-    println("Shortest Successive Beats: ", shortestDuration);
-    return shortestDuration;
-  }
-  //---------------------------------------------------------------------------
-  void getShortestRhythm()
-  {
-    //float prevBeatDur = 0;
-    //for (MidiNote n : midiScore)
-    //{
-    //  if (n.beats > 0.0)
-    //  {
-    //    if (n.beats < shortestDuration)
-    //    {
-    //      shortestDuration = n.beats;
-    //    }
-    //  }
-    //}
-    //println("shortest Duration: ", shortestDuration);
-  }
-  //---------------------------------------------------------------------------
-  void normaliseRhythm()
-  {
-    //float shortestRhythm = getShortestSuccessiveRhythm();
-    //float beatNormalise = minRepeatDur/shortestDuration;
-    //for (int i = 0; i < midiScore.size(); i++)
-    //{
-    //  MidiNote n = midiScore.get(i);
-    //  n.beats *= beatNormalise;
-    //  midiScore.set(i, n);
-    //}
-  }
+  }   
   //---------------------------------------------------------------------------
   int wrapNote(int note)
   {
@@ -235,12 +152,6 @@ class MusicBoxScore
   //---------------------------------------------------------------------------
   void drawToSvg(String filename)
   {
-    //noFill();
-    //stroke(0.01);
-    //beginRecord(SVG, filename + ".svg");
-    //midiToMusicBox();
-    //rect(0, 0, 6000, height);
-    //endRecord();
     midiToMusicBoxSvg(filename);
   }
 
