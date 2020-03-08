@@ -13,6 +13,7 @@ class MusicBoxScore
   int dpi = 226;
   float scoreHeight = 70.0;
   float margin = 6.44;
+  float leftMargin = 10.0;
   float minNoteDist = 6.5;
   float noteRadius = 2.1;
   float mmPerBeat = 8.0;
@@ -24,7 +25,7 @@ class MusicBoxScore
   //---------------------------------------------------------------------------
   int maxNote = 88;
   int minNote = 48;
-  int[] midiKeys =    {48,50, 55, 57, 59, 60, 62, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83,84, 86, 88};
+  int[] midiKeys =    {48, 50, 55, 57, 59, 60, 62, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 86, 88};
   String noteString = "C, D,  G,  A,  B,  C1, D1, E1, F1, F#1, G1,G#1,A1,A#1, B1, C2,C#2, D2, D#2,E2, F2, F#2,G2,G#2,A2, A#2,B2,C3,D3,E3";
   List<String> noteList;
   int minDelta = 20;
@@ -36,7 +37,7 @@ class MusicBoxScore
   IntList midiNotePallet;
   int missedNotes = 0;
   int transpose = 0;
-  float rhythmSqueeze = 1.0;
+  float rhythmSqueeze = 2.0;
   PGraphics svg;
   float svg_scale = 2.85;
   float pixelsSvgPerBeat = mmPerBeat * svg_scale;
@@ -79,13 +80,14 @@ class MusicBoxScore
 
     for (ArrayList<MidiNote> t : midiScore)
     {
-      writeHeadX = xWriteOffset;
+      writeHeadX = xWriteOffset - (page * int(980 * svg_scale));
       for (MidiNote n : t)
       {
         int ypos = noteToYpos(n.note + transpose, scaling);
         if (ypos != -1 )
         {
-          if (n.velocity != 0)
+          boolean inWriteZone = (writeHeadX >= xWriteOffset && writeHeadX < int(980 * scaling));
+          if (n.velocity != 0 && inWriteZone)
           {
             int xpos = writeHeadX;
             int rad =  int(noteRadius * scaling);
@@ -146,8 +148,8 @@ class MusicBoxScore
     midiToMusicBox();
     textAlign(LEFT, CENTER);
     text("Missed Notes: " + str(missedNotes), 10, 10);
-
     text("Squeeze: " + str(rhythmSqueeze), 200, 10);
+    text("Page: " + str(page), 400, 10);
   }
   //---------------------------------------------------------------------------
   void drawToSvg(String filename)
@@ -157,21 +159,22 @@ class MusicBoxScore
 
   void midiToMusicBoxSvg(String filename)
   {
-    svg = createGraphics(int(980 * svg_scale), int(69.7 * svg_scale), SVG, filename + ".svg");
+    svg = createGraphics(int(980 * svg_scale), int(69.7 * svg_scale), SVG, filename + "_page_" + str(page) + ".svg");
     ellipseMode(CENTER);
     svg.beginDraw();
     svg.noFill();
     svg.stroke(0.0001);
-
+    int writeStart = int(leftMargin * svg_scale);
     for (ArrayList<MidiNote> t : midiScore)
     {
-      writeHeadX = int(10*svg_scale);
+      writeHeadX = writeStart - (page * svg.width);       
       for (MidiNote n : t)
       {
         int ypos = noteToYpos(n.note + transpose, svg_scale);
         if (ypos != -1 )
         {
-          if (n.velocity != 0)
+          boolean inWriteZone = (writeHeadX >= writeStart && writeHeadX < svg.width);
+          if (n.velocity != 0 && inWriteZone)
           {
             int xpos = writeHeadX;
             int rad =  int(noteRadius * svg_scale);
@@ -182,7 +185,7 @@ class MusicBoxScore
           missedNotes++;
         }
         writeHeadX += pixelsSvgPerBeat * (n.beats * rhythmSqueeze);
-        if(writeHeadX > svg.width)
+        if (writeHeadX > svg.width)
         {
           break;
         }
@@ -196,6 +199,16 @@ class MusicBoxScore
   void setTranspose(int t)
   {
     transpose = t;
+  }
+
+
+  void incPage(boolean pageDir)
+  {
+    if (pageDir) 
+      page++;
+    else
+      page--;
+    page = (page < 0) ? 0 : page;
   }
 }
 
