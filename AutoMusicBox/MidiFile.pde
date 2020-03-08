@@ -127,8 +127,7 @@ class MidiEventParse extends ByteReader
         {
           for (int i = 0; i < notes.length; i+=3)
           {           
-            int midi_note = notes[i+1];
-            //int velocity = notes[i+2];
+            int midi_note = notes[i+1];            
             int velocity = (midiEventType == 0x9)? notes[i+2] : 0;
             int delta = notes[i];            
             midiNotes.add(new MidiNote(channel, midi_note, velocity, delta));
@@ -137,7 +136,7 @@ class MidiEventParse extends ByteReader
         catch(Exception e) 
         {
           printByteArray(notes);
-          throw e;
+          //throw e;
         }
         break;
       case 0xA://"Polyphonic Key Pressure");
