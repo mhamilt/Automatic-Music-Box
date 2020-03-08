@@ -3,8 +3,9 @@ import processing.svg.*;
 MidiFile midiFile;
 MusicBoxScore musicBoxScore;
 float division = 1024;
-String filename = "midi/blackbird";
-String directory = "data/svg/";
+String midiDirectory = "midi/"; 
+String filename = "mellon_collie";
+String svgDirectory = "data/svg/";
 
 void setup()
 {   
@@ -13,18 +14,18 @@ void setup()
   getDisplayDim(133);
 
   midiFile = new MidiFile();
-  midiFile.loadFile(filename);
+  midiFile.loadFile(midiDirectory + filename);
 
   musicBoxScore = new MusicBoxScore(midiFile.getAllNotes());
   background(50);    
-  musicBoxScore.drawToSvg(directory + filename);
+  musicBoxScore.drawToSvg(svgDirectory + filename);
   musicBoxScore.draw();
   noLoop();
 }
 
 void draw()
 {
-  musicBoxScore.drawToSvg(directory+filename);
+  musicBoxScore.drawToSvg(svgDirectory + filename);
   musicBoxScore.draw();
 }
 
@@ -50,13 +51,11 @@ void keyPressed()
     case DOWN:
       musicBoxScore.transpose--;
       break;
-    case LEFT:
-      //pageforward;
-      musicBoxScore.transpose-=12;
+    case LEFT:      
+      musicBoxScore.incPage(true);
       break;
-    case RIGHT:
-    //pagebackward;
-      musicBoxScore.transpose+=12;
+    case RIGHT:    
+      musicBoxScore.incPage(false);
       break;
     }
   }
