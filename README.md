@@ -18,7 +18,7 @@ A processing sketch to automatically transcribe MIDI files for [30 note chromati
 
 ### Example Ouput
 
-![](blackbird_page_0.svg)
+![](AutoMusicBox/data/svg/Une_Comptine_Autre_page_0.svg)
 
 Example files can be found in:
 
