@@ -24,6 +24,8 @@ Example files can be found in:
 
 `AutoMusicBox/data/svg`
 
+![](img/laser_cut_timelapse.gif)
+
 ***
 
 ## TODO
